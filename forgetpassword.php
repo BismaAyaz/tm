@@ -38,18 +38,14 @@ function smtpmailer($to, $from, $from_name, $subject, $body) {
 
 
 	if (isset($_POST['submit'])){ 
-		$email=mysql_real_escape_string($_POST['cand_email']);
-		$option = mysql_real_escape_string($_POST['option']);
+		$email=mysql_real_escape_string($_POST['user_email']);
 		$activation = md5(uniqid(rand(), true));
-if($email == "" || $option == "") {?>
-<script>
-alert('Error occured while sending email');
-window.location.assign("needhelp.php");
-</script>
-<?php exit();}
-else{
-		if($option == "A") {
-		$f = mysqli_query($con,"SELECT cand_id from candidate where cand_email='$email'")or die(mysqli_error($con));
+		$message = " To Reset Password, please click on this link:\n\n";
+		if (smtpmailer($email, 'ptc.exam@gmail.com', 'PIA| Reset Password', 'Registration Confirmation', $message)) {
+	// Finish the page:
+	$msg='<div class="success">! Reset Password email has been sent to '.$email.' Please click on the Link to Reset Your Password </div>';	}}
+
+	/*	$f = mysqli_query($con,"SELECT student_id from candidate where cand_email='$email'")or die(mysqli_error($con));
 													$count = mysqli_num_rows($f);
 													if($count > 0)
 													{
@@ -77,28 +73,9 @@ window.location = "needhelp.php";
 </script>
 <?php }
 }
-		//end of option A	
-else if($option == "B" or $option == "C"){ 
-$f = mysqli_query($con,"SELECT cand_id from candidate where cand_email='$email'")or die(mysqli_error($con));
-													$count = mysqli_num_rows($f);
-													if($count > 0){
-$qry=mysqli_query($con,"UPDATE candidate set Activation='$activation',active_time=NOW() where cand_email = '$email'")or die(mysqli_error($con));
-
-				$message = " To Activate Your Account, please click on this link:\n\n";
-                $message .= WEBSITE_URL . '/PIA/activate.php?email=' . urlencode($email) . "&key=$activation";
-
 	
-if (smtpmailer($email, 'ptc.exam@gmail.com', 'PIA| Account Activation', 'Registration Confirmation', $message)) {
-	// Finish the page:
-                $msg='<div class="success">! Activation email
-has been sent to '.$email.' Please click on the Link to Reset Your Password </div>';	
-}
-
 ?>
-<script>
-alert('Activation Message has been sent to your email address');
-window.location = "index.php";
-</script>
+
 </div>
 <?php }
 else { ?>
@@ -108,7 +85,9 @@ window.location = "needhelp.php";
 </script>
 <?php }}
 }}
+*/
  ?>
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -179,7 +158,7 @@ window.location = "needhelp.php";
   <div class="form-group">
     <label class="col-md-5 control-label">Email:</label>
     <div class="col-md-3">
-      <input type="text" name="cand_email" id = "email" class="form-control input-md"  placeholder="Email" pattern="[^@]+@[^@]+\.[a-zA-Z]{2,}" title="Incorrect Email" required/>
+      <input type="text" name="user_email" id = "email" class="form-control input-md"  placeholder="Email" pattern="[^@]+@[^@]+\.[a-zA-Z]{2,}" title="Incorrect Email" required/>
     </div>
   </div>
   <input type="hidden" name="option" value="<?php echo $_POST['option']; ?>" />

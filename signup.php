@@ -1,7 +1,11 @@
 <?php
 require_once('config.php');
 ?>
-<?php if (!isset($_POST['register'])){ $_POST['fname']= NULL; $_POST['fathername']= NULL; $_POST['boed']=NULL; $_POST['occupation']= NULL; $_POST['email']=NULL;$_POST['gender']=NULL; $_POST['password']=NULL;} ?>
+<?php 
+if (!isset($_POST['register']))
+	{ $_POST['fname']= NULL; $_POST['fathername']= NULL; $_POST['boed']=NULL; $_POST['occupation']= NULL; $_POST['email']=NULL;$_POST['gender']=NULL; $_POST['password']=NULL;
+	}
+ ?>
 <?php
 	if (isset($_POST['register'])){
 	$firstname=mysql_real_escape_string($_POST['fname']);
@@ -12,121 +16,64 @@ require_once('config.php');
 	$occupation=mysql_real_escape_string($_POST['occupation']);
 	$password = md5(mysql_real_escape_string($_POST['password']));
 	
-	$f = mysqli_query($con,"SELECT student_email_id,teacher_email_id from student,teacher where student_email_id='$email' or teacher_email_id='$email' ")or die(mysqli_error($con));
-													$count = mysqli_num_rows($f);
-													if($count <= 0)
-													{
-													if($firstname=="" || $fathername=="" || $email=="" || $gender=="" || $boed=="" || $password=="" || $occupation == "") 
-													{?><script>
-alert('Some Error Occured While Signing UP!');
+	//checking Student Email
+	$checkingemailquery = mysqli_query($con,"SELECT * from student where student_email_id='$email' ")or die(mysqli_error($con));
+	if(mysqli_num_rows($checkingemailquery) > 0 ) 
+	{
+?>
+<script>
+alert('Email Address Already Exist.');
 window.location = "signup.php";
-</script> <?php exit(); }
-													else {
-														if($occupation == "Student") {
-	$checking=mysqli_query($con,"INSERT INTO `candidate` (`Ref_id`, `cand_id`, `cand_password`, `cand_full_name`, `cand_father_name`, `cand_nic`, `cand_dob`, `cand_gender`, `cand_contactno`, `cand_email`, `cand_permenant_address`, `cand_current_address`, `cand_nic_attachment`, `cand_profile_pic`,`cand_pob`,`cand_organization`,`isactive`) VALUES ('0', '', '$password', '$firstname', '$fathername', '$NIC', '$bdate', '$gender', '$contact', '$email', '$paddress', '$caddress','$nicimg','$image','$pob','$organization','0')")or die(mysqli_error($con));
+</script> 
+<?php
+ exit(); 
+	}
+	//Checking Teacher Email
+	$checkingemailquery = mysqli_query($con,"SELECT * from teacher where teacher_email_id='$email' ")or die(mysqli_error($con));
+	if(mysqli_num_rows($checkingemailquery) > 0 ) 
+	{
+?>
+<script>
+alert('Email Address Already Exist.');
+window.location = "signup.php";
+</script> 
+<?php
+ exit(); 
+	}
+	
+	
+	if($occupation=="Teacher")
+	{
+	$key=md5( rand(0,1000) ); 
+	$checking=mysqli_query($con,"INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_father_name`, `teacher_email_id`, `teacher_password`, `teacher_gender`, `teacher_boed`, `teacher_activation_code`, `teacher_isactive`) VALUES (NULL, '$firstname', '$fathername', '$email', '$password', '$gender', '$boed', '$key', '0') ")or die(mysqli_error($con));
 	if($checking)
 	{
- if($organization=="Pakistan International Airlines") {$org="PIA"; } else {$org="PVT"; }
- if($_POST['refid']=='')
-{
-$select = "SELECT max(cand_id) as cand_id FROM candidate";
-$qry=mysqli_query($con,$select);
-		while($rec = mysqli_fetch_array($qry)) {
-		$cand_id = "$rec[cand_id]";}
-		$cand_idd = "000" .$cand_id;
-		$cand_idd = substr($cand_idd, -4);
-		$year = date("Y");
-		$ref_id= $year. $org. $cand_idd;
-		mysqli_query($con,"UPDATE `candidate` SET `Ref_id` = '$ref_id',isapprove=0 WHERE `candidate`.`cand_id` = '$cand_id' ")or die(mysqli_error($con));
-	    mysqli_commit($con);
-		 mysqli_close($con);
 		?>
-<script>
-alert('Your Account will be activated after admin approval.You will get confirmation email soon');
-window.location = "index.php";
-</script>
-<?php }
-else  {$qry=mysqli_query($con,"UPDATE `candidate` SET `Ref_id` = '$refid',isapprove=0 WHERE `candidate`.`cand_id` = '$cand_id' ")or die(mysqli_error($con));
-mysqli_commit($con);
- mysqli_close($con);
+		<script>
+		alert("Your account has been made, <br /> please verify it by clicking the activation link that has been send to your email.'");
+		window.location = "email.php";
+		</script>
+		<?php
+		exit();
+	}
+	}
+	if($occupation=="Student")
+	{
+		$key=md5( rand(0,1000) ); 
+	$checking=mysqli_query($con,"INSERT INTO `Student` (`Student_id`, `Student_name`, `Student_father_name`, `Student_email_id`, `Student_password`, `Student_gender`, `Student_boed`, `Student_activation_code`, `Student_isactive`) VALUES (NULL, '$firstname', '$fathername', '$email', '$password', '$gender', '$boed', '$key', '0') ")or die(mysqli_error($con));
+	if($checking)
+	{
 		?>
-<script>
-alert('Your Account will be activated after admin approval.You will get confirmation email soon');
-window.location = "index.php";
-</script>
-<?php
-   }}
-   else {
-   mysqli_rollback($con);
-   mysqli_close($con);
-   ?>
-<script>
-alert('Your Account will be activated after admin approval.You will get confirmation email soon');
-window.location = "index.php";
-</script>
-<?php }}}
-else {
-   $f = mysqli_query($con,"SELECT cand_id from candidate where  cand_nic='$NIC'  ")or die(mysqli_error($con));
-													$count = mysqli_num_rows($f);
-													$f = mysqli_query($con,"SELECT cand_email from candidate where  cand_email='$email'  ")or die(mysqli_error($con));
-													$count1 = mysqli_num_rows($f);
-													$f = mysqli_query($con,"SELECT cand_contactno from candidate where  cand_contactno='$contact'  ")or die(mysqli_error($con));
-													$count2 = mysqli_num_rows($f);
-													$f = mysqli_query($con,"SELECT cand_contactno from candidate where Ref_id='$refid'")or die(mysqli_error($con));
-													$count3 = mysqli_num_rows($f);
- if( $count>0 AND $count1<=0 AND $count2<=0 and $count3<=0) {
- ?> <script> alert('NIC already exist!'); </script> <?php $_POST['nic']=NULL;
-  echo '<div class="errormsgbox">NIC already exist!</div>';}
- else if($count<=0 AND $count1>0 AND $count2<=0 and $count3<=0) {
- ?> <script> alert('email already exist!'); </script> <?php  $_POST['email']=NULL;
-  echo '<div class="errormsgbox">Email already exist!</div>';}
- else if ($count<=0 AND $count1<=0 AND $count2>0 and $count3<=0)
- {?> <script> alert('contact no already exist!'); </script> <?php $_POST['contact']=NULL;
- echo '<div class="errormsgbox">Contact no already exist!</div>';
- }
-  else if ($count<=0 AND $count1<=0 AND $count2<=0 and $count3>0)
- {?> <script> alert('Refrence id already exist!'); </script> <?php  $_POST['refid']=NULL;
-echo '<div class="errormsgbox">Refrence id already exist!</div>';
- }
- else if( $count>0 AND $count1>0 AND $count2<=0 and $count3<=0) {
- ?> <script> alert('NIC and email already exist!'); </script> <?php  $_POST['email']=NULL; $_POST['nic']=NULL;
- echo '<div class="errormsgbox"NIC and email already exist!</div>';}
- else if( $count>0 AND $count1<=0 AND $count2>0 and $count3<=0) {
- ?> <script> alert('NIC and contact number already exist!'); </script> <?php  $_POST['contact']=NULL; $_POST['nic']=NULL;
- echo '<div class="errormsgbox">NIC and contact number already exist!</div>';}
- else if( $count<=0 AND $count1>0 AND $count2>0 and $count3<=0) {
- ?> <script> alert('Email and contact number already exist!'); </script> <?php  $_POST['email']=NULL; $_POST['contact']=NULL;
- echo '<div class="errormsgbox">Email and contact number already exist!</div>';}
- else if( $count<=0 AND $count1<=0 AND $count2>0 and $count3>0) {
- ?> <script> alert('Refrence_id and contact number already exist!'); </script> <?php  $_POST['refid']=NULL; $_POST['contact']=NULL;
- echo '<div class="errormsgbox">Refrence_id and contact number already exist!</div>';}
- else if( $count<=0 AND $count1>0 AND $count2<=0 and $count3>0) {
- ?> <script> alert('Refrence_id and Email already exist!'); </script> <?php  $_POST['email']=NULL; $_POST['refid']=NULL;
- echo '<div class="errormsgbox">Refrence_id and Email already exist!</div>';}
- else if( $count>0 AND $count1<=0 AND $count2<=0 and $count3>0) {
- ?> <script> alert('Refrence_id and NIC already exist!'); </script> <?php $_POST['refid']=NULL; $_POST['nic']=NULL;
- echo '<div class="errormsgbox">Refrence_id and NIC already exist!</div>'; }
- else if( $count>0 AND $count1>0 AND $count2>0 and $count3<=0) {
- ?> <script> alert('NIC,Email and Contact already exist!'); </script> <?php  $_POST['contact']=NULL; $_POST['email']=NULL; $_POST['nic']=NULL;
- echo '<div class="errormsgbox">NIC,Email and Contact already exist!</div>';}
- else if( $count>0 AND $count1>0 AND $count2<=0 and $count3>0) {
- ?> <script> alert('NIC,Email and Refrence_id already exist!'); </script> <?php  $_POST['refid']=NULL; $_POST['email']=NULL; $_POST['nic']=NULL; 
- echo '<div class="errormsgbox">NIC,Email and Refrence_id already exist!</div>';
- }
-  else if( $count>0 AND $count1<=0 AND $count2>0 and $count3>0) {
- ?> <script> alert('NIC,contactno and Refrence_id already exist!'); </script> <?php  $_POST['contact']=NULL; $_POST['nic']=NULL; $_POST['refid']=NULL;
- echo '<div class="errormsgbox">NIC,contactno and Refrence_id already exist!</div>';}
-  else if( $count<=0 AND $count1>0 AND $count2>0 and $count3>0) {
- ?> <script> alert('Email,contact number and Refrence_id already exist!'); </script> <?php  $_POST['refid']=NULL; $_POST['contact']=NULL; $_POST['email']=NULL; 
- echo '<div class="errormsgbox">Email,contact number and Refrence_id already exist!</div>';}
- else {
- ?> <script> alert('NIC, Email , contact numberand reference id already exist!'); </script> <?php  $_POST['contact']=NULL; $_POST['email']=NULL; $_POST['refid']=NULL; $_POST['nic']=NULL;
- echo '<div class="errormsgbox">NIC, Email , contact numberand reference id already exist!<br>You may go to <a href="needhelp.php">Send ActivationLink again</a></div>';
- }
-}
-}
-
-		?>
+		<script>
+		alert("Your account has been made, <br /> please verify it by clicking the activation link that has been send to your email.'");
+		window.location = "email.php";
+		</script>
+		<?php
+		exit();
+	}
+	}
+	}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -315,7 +262,7 @@ required>
 			</div>
 			</div>
 			
-<a href="needhelp.php">Need Help?</a> <br>
+<a href="forgetpassword.php">Forget Password?</a> <br>
 <div class="form-group">
  <button type="submit" id="submit" name="register" class="btn btn-primary btn-block">Signup</button>
   <a button id="login" name="login" class="btn btn-primary btn-block" href="login.php" >Login
